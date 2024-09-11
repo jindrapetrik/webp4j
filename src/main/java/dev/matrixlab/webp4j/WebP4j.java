@@ -74,7 +74,7 @@ class NativeLibraryLoaderUtils {
             libExtension = "so";
         } else if (os.contains("mac")) {
             platform = "mac";
-            architecture = arch.contains("arm") ? "arm64" : "x86-64";
+            architecture = arch.contains("aarch64") ? "arm64" : "x86-64";
             libExtension = "dylib";
         } else {
             throw new UnsupportedOperationException(String.format("Unsupported os: %s, arch: %s", os, arch));
