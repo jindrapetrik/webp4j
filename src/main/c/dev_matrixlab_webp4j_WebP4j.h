@@ -9,6 +9,14 @@ extern "C" {
 #endif
 /*
  * Class:     dev_matrixlab_webp4j_WebP4j
+ * Method:    getWebPInfo
+ * Signature: ([B[I)Z
+ */
+JNIEXPORT jboolean JNICALL Java_dev_matrixlab_webp4j_WebP4j_getWebPInfo
+  (JNIEnv *, jobject, jbyteArray, jintArray);
+
+/*
+ * Class:     dev_matrixlab_webp4j_WebP4j
  * Method:    encodeRGB
  * Signature: ([BIIIF)[B
  */

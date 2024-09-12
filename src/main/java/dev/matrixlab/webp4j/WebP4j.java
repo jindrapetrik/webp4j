@@ -9,13 +9,13 @@ import java.nio.file.Files;
 
 public class WebP4j {
 
-//    size_t WebPEncodeRGB(const uint8_t* rgb, int width, int height, int stride, float quality_factor, uint8_t** output);
-//    size_t WebPEncodeRGBA(const uint8_t* rgba, int width, int height, int stride, float quality_factor, uint8_t** output);
+    // int WebPGetInfo(const uint8_t* data, size_t data_size, int* width, int* height);
+    public native boolean getWebPInfo(byte[] data, int[] dimensions);
 
-    // Native method declaration for RGB encoding
+    // size_t WebPEncodeRGB(const uint8_t* rgb, int width, int height, int stride, float quality_factor, uint8_t** output);
     public native byte[] encodeRGB(byte[] image, int width, int height, int stride, float quality);
 
-    // Native method declaration for RGBA encoding
+    // size_t WebPEncodeRGBA(const uint8_t* rgba, int width, int height, int stride, float quality_factor, uint8_t** output);
     public native byte[] encodeRGBA(byte[] image, int width, int height, int stride, float quality);
 
     private static volatile boolean NATIVE_LIBRARY_LOADED = false;

@@ -1,6 +1,7 @@
 #include <jni.h>
 #include <stdlib.h>
 #include <webp/encode.h>
+#include <webp/decode.h>
 #include "dev_matrixlab_webp4j_WebP4j.h"
 
 /*
@@ -9,11 +10,21 @@
 uint8_t* jByteArrayToUint8(JNIEnv *env, jbyteArray array) {
     jsize len = (*env)->GetArrayLength(env, array);
     jbyte* data = (*env)->GetByteArrayElements(env, array, 0);
+    if (data == NULL) {
+        return NULL;  // Failed to get byte array
+    }
+
     uint8_t* result = (uint8_t*) malloc(len * sizeof(uint8_t));
+    if (result == NULL) {
+        (*env)->ReleaseByteArrayElements(env, array, data, JNI_ABORT);
+        return NULL;  // Memory allocation failed
+    }
+
     for (int i = 0; i < len; i++) {
         result[i] = (uint8_t) data[i];
     }
-    (*env)->ReleaseByteArrayElements(env, array, data, 0);
+
+    (*env)->ReleaseByteArrayElements(env, array, data, JNI_ABORT);
     return result;
 }
 
@@ -34,6 +45,9 @@ JNIEXPORT jbyteArray JNICALL Java_dev_matrixlab_webp4j_WebP4j_encodeRGB
 
     // Convert Java byte array to native uint8_t array
     uint8_t* rgb = jByteArrayToUint8(env, image);
+    if (rgb == NULL) {
+        return NULL;  // Failed to convert byte array
+    }
 
     // Output buffer
     uint8_t* output = NULL;
@@ -44,13 +58,17 @@ JNIEXPORT jbyteArray JNICALL Java_dev_matrixlab_webp4j_WebP4j_encodeRGB
     // Free the input RGB array
     freeUint8(rgb);
 
-    // Check if output is NULL
-    if (output_size == 0) {
-        return NULL;
+    // Check if encoding was successful
+    if (output_size == 0 || output == NULL) {
+        return NULL;  // Encoding failed
     }
 
     // Create a new Java byte array for the output
     jbyteArray result = (*env)->NewByteArray(env, output_size);
+    if (result == NULL) {
+        WebPFree(output);  // Ensure the output buffer is freed
+        return NULL;  // Memory allocation failed
+    }
 
     // Copy the encoded output to the Java byte array
     (*env)->SetByteArrayRegion(env, result, 0, output_size, (jbyte*) output);
@@ -70,6 +88,9 @@ JNIEXPORT jbyteArray JNICALL Java_dev_matrixlab_webp4j_WebP4j_encodeRGBA
 
     // Convert Java byte array to native uint8_t array
     uint8_t* rgba = jByteArrayToUint8(env, image);
+    if (rgba == NULL) {
+        return NULL;  // Failed to convert byte array
+    }
 
     // Output buffer
     uint8_t* output = NULL;
@@ -80,13 +101,17 @@ JNIEXPORT jbyteArray JNICALL Java_dev_matrixlab_webp4j_WebP4j_encodeRGBA
     // Free the input RGBA array
     freeUint8(rgba);
 
-    // Check if output is NULL
-    if (output_size == 0) {
-        return NULL;
+    // Check if encoding was successful
+    if (output_size == 0 || output == NULL) {
+        return NULL;  // Encoding failed
     }
 
     // Create a new Java byte array for the output
     jbyteArray result = (*env)->NewByteArray(env, output_size);
+    if (result == NULL) {
+        WebPFree(output);  // Ensure the output buffer is freed
+        return NULL;  // Memory allocation failed
+    }
 
     // Copy the encoded output to the Java byte array
     (*env)->SetByteArrayRegion(env, result, 0, output_size, (jbyte*) output);
@@ -96,4 +121,57 @@ JNIEXPORT jbyteArray JNICALL Java_dev_matrixlab_webp4j_WebP4j_encodeRGBA
 
     // Return the result
     return result;
+}
+
+/*
+ * Implementation of the getWebPInfo method.
+ * This method retrieves the width and height of a WebP image.
+ */
+JNIEXPORT jboolean JNICALL Java_dev_matrixlab_webp4j_WebP4j_getWebPInfo
+  (JNIEnv *env, jobject obj, jbyteArray data, jintArray dimensions) {
+
+    // Convert Java byte array to native uint8_t array
+    jbyte* webp_data = (*env)->GetByteArrayElements(env, data, NULL);
+    if (webp_data == NULL) {
+        return JNI_FALSE;  // Failed to convert byte array
+    }
+
+    // Retrieve the length of the WebP data
+    jsize data_size = (*env)->GetArrayLength(env, data);
+
+    // Declare width and height variables
+    int width = 0;
+    int height = 0;
+
+    // WebP feature structure
+    WebPBitstreamFeatures features;
+
+    // Use WebPGetFeatures to retrieve the width and height of the WebP image
+    VP8StatusCode status = WebPGetFeatures((const uint8_t*)webp_data, (size_t)data_size, &features);
+
+    if (status != VP8_STATUS_OK) {
+        (*env)->ReleaseByteArrayElements(env, data, webp_data, JNI_ABORT);
+        return JNI_FALSE;  // Failed to get WebP features
+    }
+
+    // Set width and height
+    width = features.width;
+    height = features.height;
+
+    // Get the dimensions array from Java
+    jint* dims = (*env)->GetIntArrayElements(env, dimensions, NULL);
+    if (dims == NULL) {
+        (*env)->ReleaseByteArrayElements(env, data, webp_data, JNI_ABORT);
+        return JNI_FALSE;  // Failed to get int array
+    }
+
+    // Store the width and height in the dimensions array
+    dims[0] = width;
+    dims[1] = height;
+
+    // Release the dimensions array and the WebP data
+    (*env)->ReleaseIntArrayElements(env, dimensions, dims, 0);
+    (*env)->ReleaseByteArrayElements(env, data, webp_data, JNI_ABORT);
+
+    return JNI_TRUE;  // Success
 }
