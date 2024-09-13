@@ -175,3 +175,99 @@ JNIEXPORT jboolean JNICALL Java_dev_matrixlab_webp4j_WebP4j_getWebPInfo
 
     return JNI_TRUE;  // Success
 }
+
+/*
+ * Implementation of the decodeRGBAInto method.
+ */
+JNIEXPORT jboolean JNICALL Java_dev_matrixlab_webp4j_WebP4j_decodeRGBAInto
+  (JNIEnv *env, jobject obj, jbyteArray data, jbyteArray outputBuffer, jint outputStride) {
+
+    // Get data size
+    jsize data_size = (*env)->GetArrayLength(env, data);
+
+    // Get webp data
+    jbyte* webp_data = (*env)->GetByteArrayElements(env, data, NULL);
+    if (webp_data == NULL) {
+        return JNI_FALSE;  // Failed to get data
+    }
+
+    // Get output buffer size
+    jsize output_buffer_size = (*env)->GetArrayLength(env, outputBuffer);
+
+    // Get output buffer
+    jbyte* output_buffer = (*env)->GetByteArrayElements(env, outputBuffer, NULL);
+    if (output_buffer == NULL) {
+        (*env)->ReleaseByteArrayElements(env, data, webp_data, JNI_ABORT);
+        return JNI_FALSE;
+    }
+
+    // Call WebPDecodeRGBAInto
+    uint8_t* result = WebPDecodeRGBAInto(
+        (const uint8_t*)webp_data,
+        (size_t)data_size,
+        (uint8_t*)output_buffer,
+        (int)output_buffer_size,
+        (int)outputStride
+    );
+
+    // Release the input data
+    (*env)->ReleaseByteArrayElements(env, data, webp_data, JNI_ABORT);
+
+    // Release the output buffer and commit changes
+    (*env)->ReleaseByteArrayElements(env, outputBuffer, output_buffer, 0);
+
+    // Check if decoding was successful
+    if (result == NULL) {
+        return JNI_FALSE;
+    }
+
+    return JNI_TRUE;
+}
+
+/*
+ * Implementation of the decodeRGBInto method.
+ */
+JNIEXPORT jboolean JNICALL Java_dev_matrixlab_webp4j_WebP4j_decodeRGBInto
+  (JNIEnv *env, jobject obj, jbyteArray data, jbyteArray outputBuffer, jint outputStride) {
+
+    // Get data size
+    jsize data_size = (*env)->GetArrayLength(env, data);
+
+    // Get webp data
+    jbyte* webp_data = (*env)->GetByteArrayElements(env, data, NULL);
+    if (webp_data == NULL) {
+        return JNI_FALSE;  // Failed to get data
+    }
+
+    // Get output buffer size
+    jsize output_buffer_size = (*env)->GetArrayLength(env, outputBuffer);
+
+    // Get output buffer
+    jbyte* output_buffer = (*env)->GetByteArrayElements(env, outputBuffer, NULL);
+    if (output_buffer == NULL) {
+        (*env)->ReleaseByteArrayElements(env, data, webp_data, JNI_ABORT);
+        return JNI_FALSE;
+    }
+
+    // Call WebPDecodeRGBInto
+    uint8_t* result = WebPDecodeRGBInto(
+        (const uint8_t*)webp_data,
+        (size_t)data_size,
+        (uint8_t*)output_buffer,
+        (int)output_buffer_size,
+        (int)outputStride
+    );
+
+    // Release the input data
+    (*env)->ReleaseByteArrayElements(env, data, webp_data, JNI_ABORT);
+
+    // Release the output buffer and commit changes
+    (*env)->ReleaseByteArrayElements(env, outputBuffer, output_buffer, 0);
+
+    // Check if decoding was successful
+    if (result == NULL) {
+        return JNI_FALSE;
+    }
+
+    return JNI_TRUE;
+}

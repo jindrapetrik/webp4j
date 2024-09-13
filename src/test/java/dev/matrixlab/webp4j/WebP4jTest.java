@@ -14,8 +14,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class WebP4jTest {
 
-    private static final String TEST_WEBP_FILE = "path/to/test_image.webp";
-    private static final String TEST_IMAGE_FILE = "path/to/test_image.jpg";
+    private static final String TEST_WEBP_FILE = "encoded_rgb_image.webp";
+    private static final String TEST_IMAGE_FILE = "C:\\Users\\jiebu\\Documents\\Projects\\webp4j\\src\\test\\java\\dev\\matrixlab\\webp4j\\pexels-opticaltimeline-28336603.jpg";
 
     @BeforeAll
     public static void setup() {
@@ -40,8 +40,8 @@ public class WebP4jTest {
 
             // Validate the retrieved image dimensions
             assertTrue(success, "Failed to retrieve WebP image information.");
-            assertEquals(800, dimensions[0], "Width does not match expected value.");
-            assertEquals(600, dimensions[1], "Height does not match expected value.");
+            assertEquals(5152, dimensions[0], "Width does not match expected value.");
+            assertEquals(6440, dimensions[1], "Height does not match expected value.");
 
         } catch (IOException e) {
             fail("Exception thrown during WebP info retrieval: " + e.getMessage());
@@ -58,7 +58,6 @@ public class WebP4jTest {
             // Get image width, height, and byte array
             int width = bufferedImage.getWidth();
             int height = bufferedImage.getHeight();
-            boolean hasAlpha = bufferedImage.getColorModel().hasAlpha();
             byte[] imageBytes = extractImageBytes(bufferedImage, false);
 
             // Instantiate WebP4j
@@ -92,8 +91,7 @@ public class WebP4jTest {
             // Get image width, height, and byte array
             int width = bufferedImage.getWidth();
             int height = bufferedImage.getHeight();
-            boolean hasAlpha = bufferedImage.getColorModel().hasAlpha();
-            byte[] imageBytes = extractImageBytes(bufferedImage, hasAlpha);
+            byte[] imageBytes = extractImageBytes(bufferedImage, bufferedImage.getColorModel().hasAlpha());
 
             // Instantiate WebP4j
             WebP4j webP4j = new WebP4j();

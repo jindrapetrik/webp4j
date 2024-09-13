@@ -1,6 +1,5 @@
 package dev.matrixlab.webp4j;
 
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -17,6 +16,10 @@ public class WebP4j {
 
     // size_t WebPEncodeRGBA(const uint8_t* rgba, int width, int height, int stride, float quality_factor, uint8_t** output);
     public native byte[] encodeRGBA(byte[] image, int width, int height, int stride, float quality);
+
+    // New native methods
+    public native boolean decodeRGBAInto(byte[] data, byte[] outputBuffer, int outputStride);
+    public native boolean decodeRGBInto(byte[] data, byte[] outputBuffer, int outputStride);
 
     private static volatile boolean NATIVE_LIBRARY_LOADED = false;
 

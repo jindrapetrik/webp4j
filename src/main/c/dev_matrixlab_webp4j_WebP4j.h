@@ -31,6 +31,22 @@ JNIEXPORT jbyteArray JNICALL Java_dev_matrixlab_webp4j_WebP4j_encodeRGB
 JNIEXPORT jbyteArray JNICALL Java_dev_matrixlab_webp4j_WebP4j_encodeRGBA
   (JNIEnv *, jobject, jbyteArray, jint, jint, jint, jfloat);
 
+/*
+ * Class:     dev_matrixlab_webp4j_WebP4j
+ * Method:    decodeRGBAInto
+ * Signature: ([B[BI)Z
+ */
+JNIEXPORT jboolean JNICALL Java_dev_matrixlab_webp4j_WebP4j_decodeRGBAInto
+  (JNIEnv *, jobject, jbyteArray, jbyteArray, jint);
+
+/*
+ * Class:     dev_matrixlab_webp4j_WebP4j
+ * Method:    decodeRGBInto
+ * Signature: ([B[BI)Z
+ */
+JNIEXPORT jboolean JNICALL Java_dev_matrixlab_webp4j_WebP4j_decodeRGBInto
+  (JNIEnv *, jobject, jbyteArray, jbyteArray, jint);
+
 #ifdef __cplusplus
 }
 #endif
