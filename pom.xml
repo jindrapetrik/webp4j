@@ -2,13 +2,36 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>dev.matrixlab.webp4j</groupId>
+  <groupId>dev.matrixlab</groupId>
   <artifactId>webp4j</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0.0-beta</version>
   <packaging>jar</packaging>
 
   <name>webp4j</name>
-  <url>http://maven.apache.org</url>
+  <description>WebP4j is a Java library based on JNI (Java Native Interface) that supports WebP image encoding and decoding in Java projects.</description>
+  <url>https://github.com/MrNanko/webp4j</url>
+
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>https://opensource.org/licenses/MIT</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <id>MrNanko</id>
+      <name>MrNanko</name>
+      <email>i@matrixlab.dev</email>
+    </developer>
+  </developers>
+
+  <scm>
+    <url>https://github.com/MrNanko/webp4j.git</url>
+    <connection>scm:git:git://github.com/MrNanko/webp4j.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com:MrNanko/webp4j.git</developerConnection>
+  </scm>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -30,4 +53,58 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.sonatype.central</groupId>
+        <artifactId>central-publishing-maven-plugin</artifactId>
+        <version>0.5.0</version>
+        <extensions>true</extensions>
+        <configuration>
+          <publishingServerId>webp4j</publishingServerId>
+          <tokenAuth>true</tokenAuth>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>3.3.1</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.10.0</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <version>3.2.6</version>
+        <executions>
+          <execution>
+            <id>sign-artifacts</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>sign</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
 </project>
