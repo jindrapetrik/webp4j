@@ -45,7 +45,8 @@ public native boolean decodeRGBInto(byte[] data, byte[] outputBuffer, int output
 
 ## Future Work
 
-At present, WebP4j has been developed with native methods for JNI calls, supporting encoding and decoding of RGB and RGBA images. In the future, we plan to further encapsulate and extend the functionality, aiming to provide a **high-level API** that is easy to use and ready out-of-the-box. The goal is to make the library even more user-friendly by abstracting low-level operations, allowing developers to focus on integration without needing to manage native resources directly.
+- Publish WebP4j to Maven Central
+- At present, WebP4j has been developed with native methods for JNI calls, supporting encoding and decoding of RGB and RGBA images. In the future, we plan to further encapsulate and extend the functionality, aiming to provide a **high-level API** that is easy to use and ready out-of-the-box. The goal is to make the library even more user-friendly by abstracting low-level operations, allowing developers to focus on integration without needing to manage native resources directly.
 
 Stay tuned for upcoming updates!
 
