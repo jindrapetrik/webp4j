@@ -17,8 +17,10 @@ public class WebP4j {
     // size_t WebPEncodeRGBA(const uint8_t* rgba, int width, int height, int stride, float quality_factor, uint8_t** output);
     public native byte[] encodeRGBA(byte[] image, int width, int height, int stride, float quality);
 
-    // New native methods
+    // uint8_t* WebPDecodeRGBAInto(const uint8_t* data, size_t data_size, uint8_t* output_buffer, int output_buffer_size, int output_stride);
     public native boolean decodeRGBAInto(byte[] data, byte[] outputBuffer, int outputStride);
+
+    // uint8_t* WebPDecodeRGBInto(const uint8_t* data, size_t data_size, uint8_t* output_buffer, int output_buffer_size, int output_stride);
     public native boolean decodeRGBInto(byte[] data, byte[] outputBuffer, int outputStride);
 
     private static volatile boolean NATIVE_LIBRARY_LOADED = false;
@@ -73,7 +75,7 @@ class NativeLibraryLoaderUtils {
             libExtension = "dll";
         } else if (os.contains("nux") || os.contains("linux")) {
             platform = "linux";
-            architecture = arch.contains("arm") ? "aarch64" : "x86-64";
+            architecture = arch.contains("aarch64") ? "aarch64" : "x86-64";
             libExtension = "so";
         } else if (os.contains("mac")) {
             platform = "mac";
@@ -91,7 +93,7 @@ class NativeLibraryLoaderUtils {
         // Get the library from the jar
         try (InputStream in = NativeLibraryLoaderUtils.class.getResourceAsStream(resourcePath)) {
             if (in == null) {
-                throw new RuntimeException(String.format("Could not find WebP native library for %s %s in the jar", os, arch));
+                throw new RuntimeException(String.format("Could not find WebP native library(%s) for %s %s in the jar", libraryFileName, os, arch));
             }
 
             File tempLibraryFile = Files.createTempFile("", libraryFileName).toFile();
