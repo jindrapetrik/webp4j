@@ -63,7 +63,6 @@
         <extensions>true</extensions>
         <configuration>
           <publishingServerId>webp4j</publishingServerId>
-          <tokenAuth>true</tokenAuth>
         </configuration>
       </plugin>
       <plugin>

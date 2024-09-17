@@ -35,6 +35,16 @@ Unfortunately, I do not have access to a macOS (x86-64) device, so I am unable t
 
 ## API
 
+### Loading the Native Library
+
+First, ensure the native library is loaded before calling any other methods:
+
+```java
+WebP4j.ensureNativeLibraryLoaded();
+```
+
+### Encoding and Decoding
+
 ```java
 public native boolean getWebPInfo(byte[] data, int[] dimensions);
 public native byte[] encodeRGB(byte[] image, int width, int height, int stride, float quality);
