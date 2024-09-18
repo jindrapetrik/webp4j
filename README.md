@@ -9,6 +9,7 @@
 - Provides efficient image compression and decompression using libwebp.
 - Compatible with multiple platforms (supports x86 and ARM).
 - Developed and tested with **JDK 17**.
+- Published WebP4j to Maven Central Repository.
 
 ## Prerequisites
 
@@ -35,6 +36,18 @@ Unfortunately, I do not have access to a macOS (x86-64) device, so I am unable t
 
 ## API
 
+### Maven Dependency
+
+To use WebP4j in your project, add the following dependency to your `pom.xml` file:
+
+```xml
+<dependency>
+    <groupId>dev.matrixlab</groupId>
+    <artifactId>webp4j</artifactId>
+    <version>1.0.0-beta</version>
+</dependency>
+```
+
 ### Loading the Native Library
 
 First, ensure the native library is loaded before calling any other methods:
@@ -55,7 +68,6 @@ public native boolean decodeRGBInto(byte[] data, byte[] outputBuffer, int output
 
 ## Future Work
 
-- Publish WebP4j to Maven Central
 - At present, WebP4j has been developed with native methods for JNI calls, supporting encoding and decoding of RGB and RGBA images. In the future, we plan to further encapsulate and extend the functionality, aiming to provide a **high-level API** that is easy to use and ready out-of-the-box. The goal is to make the library even more user-friendly by abstracting low-level operations, allowing developers to focus on integration without needing to manage native resources directly.
 
 Stay tuned for upcoming updates!
