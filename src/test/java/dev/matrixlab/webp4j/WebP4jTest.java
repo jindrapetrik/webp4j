@@ -15,21 +15,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class WebP4jTest {
 
-    private static WebP4j webP4j;
+    private static final WebP4j webP4j = new WebP4j();
 
     public static final String IMAGE_RGB_FILE = Paths.get(System.getProperty("user.dir"), "/src/test/resources", "test_rgb.jpg").toString();
 
     public static final String IMAGE_RGB_WEBP_FILE = Paths.get(System.getProperty("user.dir"), "/src/test/resources", "test_rgb.webp").toString();
 
     public static final String IMAGE_RGBA_FILE = Paths.get(System.getProperty("user.dir"), "/src/test/resources", "test_rgba.png").toString();
-
-    @BeforeAll
-    public static void setup() {
-        // Ensure the native library is loaded
-        WebP4j.ensureNativeLibraryLoaded();
-        // Initialize the singleton instance
-        webP4j = new WebP4j();
-    }
 
     @Test
     public void testGetWebPInfo() {
