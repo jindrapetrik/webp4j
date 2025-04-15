@@ -1,11 +1,5 @@
 package dev.matrixlab.webp4j;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-
 public class WebP4j {
 
     // int WebPGetInfo(const uint8_t* data, size_t data_size, int* width, int* height);
