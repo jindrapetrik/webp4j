@@ -1,15 +1,14 @@
 package dev.matrixlab.webp4j;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import javax.imageio.ImageIO;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -55,7 +54,7 @@ public class WebP4jTest {
             // Get image width, height, and byte array
             int width = bufferedImage.getWidth();
             int height = bufferedImage.getHeight();
-            byte[] imageBytes = convertBufferedImageToBytes(bufferedImage);
+            byte[] imageBytes = WebPCodec.convertBufferedImageToBytes(bufferedImage);
 
             // Encode image to WebP
             float quality = 75.0f;
@@ -91,7 +90,7 @@ public class WebP4jTest {
             }
 
             // Convert BufferedImage to byte array in RGBA format
-            byte[] imageBytes = convertBufferedImageToBytes(bufferedImage);
+            byte[] imageBytes = WebPCodec.convertBufferedImageToBytes(bufferedImage);
 
             // Encode image to WebP
             float quality = 75.0f;
@@ -132,7 +131,7 @@ public class WebP4jTest {
         assertTrue(result, "Failed to decode WebP into RGB.");
 
         // Create BufferedImage from decoded RGB data
-        BufferedImage image = convertBytesToBufferedImage(width, height, outputBuffer);
+        BufferedImage image = WebPCodec.convertBytesToBufferedImage(width, height, outputBuffer);
 
         // Save decoded image to a file
         ImageIO.write(image, "jpg", new File(IMAGE_RGB_FILE.replace("test_rgb.jpg", "decode_rgb.jpg")));
@@ -157,7 +156,7 @@ public class WebP4jTest {
         boolean result = webP4j.decodeRGBAInto(webPData, outputBuffer, outputStride);
         assertTrue(result, "Failed to decode WebP into RGBA.");
         // Create BufferedImage from decoded RGBA data
-        BufferedImage image = convertBytesToBufferedImage(width, height, outputBuffer);
+        BufferedImage image = WebPCodec.convertBytesToBufferedImage(width, height, outputBuffer);
 
         // Save decoded image to a file
         ImageIO.write(image, "png", new File(IMAGE_RGBA_FILE.replace("test_rgba.png", "decoded_rgba.png")));
@@ -246,6 +245,93 @@ public class WebP4jTest {
 
         // Return the byte array containing the extracted pixel data.
         return output;
+    }
+
+    /**
+     * Tests the performance and memory usage of the conversion methods:
+     * - `convertBufferedImageToBytes`: Converts a BufferedImage to a byte array.
+     * - `convertBytesToBufferedImage`: Converts a byte array back to a BufferedImage.
+     * <p>
+     * The test measures:
+     * 1. Encoding time and memory usage for converting a BufferedImage to a byte array.
+     * 2. Decoding time and memory usage for reconstructing a BufferedImage from a byte array.
+     * <p>
+     * Steps:
+     * - Load a test image from the file system.
+     * - Measure memory usage and execution time for encoding the image.
+     * - Validate the encoded byte array for correctness.
+     * - Measure memory usage and execution time for decoding the byte array.
+     * - Validate the reconstructed BufferedImage for correctness.
+     * - Log the performance metrics (time in seconds, memory in MB).
+     * <p>
+     * Assertions:
+     * - The encoded byte array is not null and has the expected size.
+     * - The reconstructed BufferedImage matches the original image in dimensions.
+     * <p>
+     * Logs:
+     * - Encoding time in seconds.
+     * - Memory used for encoding in MB.
+     * - Decoding time in seconds.
+     * - Memory used for decoding in MB.
+     */
+    @Test
+    public void testConvertBufferedImageToBytesAndBackPerformance() {
+        try {
+            // Load a test image
+            BufferedImage originalImage = ImageIO.read(new File(IMAGE_RGB_FILE));
+            assertNotNull(originalImage, "Failed to load test image.");
+
+            // Measure memory usage before encoding
+            Runtime runtime = Runtime.getRuntime();
+            runtime.gc(); // Suggest garbage collection
+            long memoryBeforeEncoding = runtime.totalMemory() - runtime.freeMemory();
+
+            // Measure encoding time
+            long startEncodingTime = System.nanoTime();
+            byte[] imageBytes = WebPCodec.convertBufferedImageToBytes(originalImage);
+            long endEncodingTime = System.nanoTime();
+
+            // Measure memory usage after encoding
+            long memoryAfterEncoding = runtime.totalMemory() - runtime.freeMemory();
+
+            // Validate encoding result
+            assertNotNull(imageBytes, "Encoding result is null.");
+            int expectedSize = originalImage.getWidth() * originalImage.getHeight() *
+                    (originalImage.getColorModel().hasAlpha() ? 4 : 3);
+            assertEquals(expectedSize, imageBytes.length, "Unexpected byte array size.");
+
+            // Measure memory usage before decoding
+            runtime.gc();
+            long memoryBeforeDecoding = runtime.totalMemory() - runtime.freeMemory();
+
+            // Measure decoding time
+            long startDecodingTime = System.nanoTime();
+            BufferedImage reconstructedImage = WebPCodec.convertBytesToBufferedImage(
+                    originalImage.getWidth(), originalImage.getHeight(), imageBytes);
+            long endDecodingTime = System.nanoTime();
+
+            // Measure memory usage after decoding
+            long memoryAfterDecoding = runtime.totalMemory() - runtime.freeMemory();
+
+            // Validate decoding result
+            assertNotNull(reconstructedImage, "Decoding result is null.");
+            assertEquals(originalImage.getWidth(), reconstructedImage.getWidth(), "Width mismatch.");
+            assertEquals(originalImage.getHeight(), reconstructedImage.getHeight(), "Height mismatch.");
+
+            // Log performance metrics with unit conversion
+            double encodingTimeInSeconds = (endEncodingTime - startEncodingTime) / 1_000_000_000.0;
+            double decodingTimeInSeconds = (endDecodingTime - startDecodingTime) / 1_000_000_000.0;
+            double memoryUsedForEncodingInMB = (memoryAfterEncoding - memoryBeforeEncoding) / (1024.0 * 1024.0);
+            double memoryUsedForDecodingInMB = (memoryAfterDecoding - memoryBeforeDecoding) / (1024.0 * 1024.0);
+
+            System.out.println("Encoding time (s): " + encodingTimeInSeconds);
+            System.out.println("Memory used for encoding (MB): " + memoryUsedForEncodingInMB);
+            System.out.println("Decoding time (s): " + decodingTimeInSeconds);
+            System.out.println("Memory used for decoding (MB): " + memoryUsedForDecodingInMB);
+
+        } catch (IOException e) {
+            fail("Exception thrown during performance test: " + e.getMessage());
+        }
     }
 
 }
