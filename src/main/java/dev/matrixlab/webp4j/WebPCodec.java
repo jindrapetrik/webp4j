@@ -4,8 +4,132 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
 import java.awt.image.DataBufferInt;
+import java.io.IOException;
+import java.util.Arrays;
 
-public class WebPCodec {
+public final class WebPCodec {
+
+    // Static dependency: initialize the WebP4j instance.
+    private static final WebP4j webP4j;
+
+    static {
+        // Using the default constructor.
+        webP4j = new WebP4j();
+    }
+
+    // Private constructor to prevent instantiation.
+    private WebPCodec() {
+        throw new AssertionError("Cannot instantiate utility class.");
+    }
+
+    /**
+     * Retrieves information about a WebP image.
+     *
+     * @param webPData Byte array containing WebP image data
+     * @return int array containing width and height of the image [width, height]
+     * @throws IOException If there is an error processing the image
+     */
+    public static int[] getWebPInfo(byte[] webPData) throws IOException {
+        int[] dimensions = new int[2];
+        boolean success = webP4j.getWebPInfo(webPData, dimensions);
+
+        if (!success) {
+            throw new IOException("Failed to retrieve WebP image information.");
+        }
+
+        return dimensions;
+    }
+
+    /**
+     * Encodes an RGB/RGBA BufferedImage to a WebP encoded byte array.
+     *
+     * @param bufferedImage The input BufferedImage in RGB/RGBA(must have an alpha channel) format.
+     * @param quality       The WebP quality parameter (e.g., 75.0f).
+     * @return A byte array containing the WebP encoded data.
+     * @throws IOException If an error occurs during image conversion or encoding.
+     */
+    public static byte[] encodeImage(BufferedImage bufferedImage, float quality) throws IOException {
+        if (bufferedImage == null) {
+            throw new IllegalArgumentException("The input BufferedImage cannot be null.");
+        }
+
+        // Get the image width and height.
+        int width = bufferedImage.getWidth();
+        int height = bufferedImage.getHeight();
+
+        // Convert the BufferedImage to an RGB/RGBA byte array.
+        byte[] imageBytes = WebPCodec.convertBufferedImageToBytes(bufferedImage);
+        if (imageBytes.length == 0) {
+            throw new IOException("Failed to convert BufferedImage to a byte array.");
+        }
+
+        // Release image resources as soon as they are no longer needed.
+        bufferedImage.flush();
+
+        boolean hasAlpha = bufferedImage.getColorModel().hasAlpha();
+
+        // Calculate the stride (number of bytes per row), each pixel is represented by 3 bytes (RGB) / 4 bytes (RGBA).
+        int stride = width * (hasAlpha ? 4 : 3);
+
+        // Encode the RGB/RGBA data to WebP format using webP4j.
+        byte[] encodedWebP = null;
+        try {
+            encodedWebP = hasAlpha
+                    ? webP4j.encodeRGBA(imageBytes, width, height, stride, quality)
+                    : webP4j.encodeRGB(imageBytes, width, height, stride, quality);
+            if (encodedWebP == null || encodedWebP.length == 0) {
+                throw new IOException("WebP encoding failed.");
+            }
+            return encodedWebP;
+        } finally {
+            // Clear the contents of the outputBuffer and remove its reference to allow garbage collection.
+            Arrays.fill(imageBytes, (byte) 0);
+            imageBytes = null;
+        }
+
+    }
+
+    /**
+     * Decodes a WebP image (stored as a byte array) into an RGB/RGBA BufferedImage.
+     *
+     * @param webPData The byte array containing the WebP encoded image.
+     * @return A BufferedImage representing the decoded RGB/RGBA image.
+     * @throws IOException If an error occurs during retrieval of image info or decoding.
+     */
+    public static BufferedImage decodeImage(byte[] webPData, boolean hasAlpha) throws IOException {
+        if (webPData == null || webPData.length == 0) {
+            throw new IllegalArgumentException("The input WebP data cannot be null or empty.");
+        }
+
+        // Retrieve image dimensions from the WebP data.
+        int[] dimensions = WebPCodec.getWebPInfo(webPData);
+
+        int width = dimensions[0];
+        int height = dimensions[1];
+
+        // Calculate the stride for RGB (3 bytes per pixel) / RGBA (4 bytes per pixel).
+        int outputStride = width * (hasAlpha ? 4 : 3);
+
+        // Allocate a buffer for the decoded RGB/RGBA image data.
+        byte[] outputBuffer = new byte[height * outputStride];
+
+        try {
+            // Decode the WebP data into the provided RGB/RGBA buffer.
+            boolean success = hasAlpha
+                    ? webP4j.decodeRGBAInto(webPData, outputBuffer, outputStride)
+                    : webP4j.decodeRGBInto(webPData, outputBuffer, outputStride);
+            if (!success) {
+                throw new IOException("Failed to decode WebP data into RGB buffer.");
+            }
+
+            // Convert the decoded RGB/RGBA byte array into a BufferedImage.
+            return WebPCodec.convertBytesToBufferedImage(width, height, outputBuffer);
+        } finally {
+            // Clear the contents of the outputBuffer and remove its reference to allow garbage collection.
+            Arrays.fill(outputBuffer, (byte) 0);
+            outputBuffer = null;
+        }
+    }
 
     /**
      * Creates a BufferedImage from a byte array containing pixel data.
@@ -24,7 +148,7 @@ public class WebPCodec {
      * @throws IllegalArgumentException if the length of the outputBuffer does not match the expected size
      *                                  for the given width, height, and pixel format.
      */
-    public static BufferedImage convertBytesToBufferedImage(int width, int height, byte[] outputBuffer) {
+    private static BufferedImage convertBytesToBufferedImage(int width, int height, byte[] outputBuffer) {
         // Determine if the input buffer is RGB (3 bytes per pixel) or ARGB (4 bytes per pixel)
         boolean hasAlpha = outputBuffer.length == width * height * 4;
         int imageType = hasAlpha ? BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB;
@@ -64,7 +188,7 @@ public class WebPCodec {
      * @param image The BufferedImage to extract pixel data from.
      * @return A byte array containing the pixel data in the appropriate color format.
      */
-    public static byte[] convertBufferedImageToBytes(BufferedImage image) {
+    private static byte[] convertBufferedImageToBytes(BufferedImage image) {
         // Check if the image has an Alpha channel
         boolean hasAlpha = image.getColorModel().hasAlpha();
 
