@@ -9,12 +9,12 @@ import java.util.Arrays;
 
 public final class WebPCodec {
 
-    // Static dependency: initialize the WebP4j instance.
-    private static final WebP4j webP4j;
+    // Static dependency: initialize the NativeWebP instance.
+    private static final NativeWebP nativeWebP;
 
     static {
         // Using the default constructor.
-        webP4j = new WebP4j();
+        nativeWebP = new NativeWebP();
     }
 
     // Private constructor to prevent instantiation.
@@ -31,7 +31,7 @@ public final class WebPCodec {
      */
     public static int[] getWebPInfo(byte[] webPData) throws IOException {
         int[] dimensions = new int[2];
-        boolean success = webP4j.getWebPInfo(webPData, dimensions);
+        boolean success = nativeWebP.getInfo(webPData, dimensions);
 
         if (!success) {
             throw new IOException("Failed to retrieve WebP image information.");
@@ -71,12 +71,12 @@ public final class WebPCodec {
         // Calculate the stride (number of bytes per row), each pixel is represented by 3 bytes (RGB) / 4 bytes (RGBA).
         int stride = width * (hasAlpha ? 4 : 3);
 
-        // Encode the RGB/RGBA data to WebP format using webP4j.
+        // Encode the RGB/RGBA data to WebP format using nativeWebP.
         byte[] encodedWebP = null;
         try {
             encodedWebP = hasAlpha
-                    ? webP4j.encodeRGBA(imageBytes, width, height, stride, quality)
-                    : webP4j.encodeRGB(imageBytes, width, height, stride, quality);
+                    ? nativeWebP.encodeRGBA(imageBytes, width, height, stride, quality)
+                    : nativeWebP.encodeRGB(imageBytes, width, height, stride, quality);
             if (encodedWebP == null || encodedWebP.length == 0) {
                 throw new IOException("WebP encoding failed.");
             }
@@ -96,7 +96,7 @@ public final class WebPCodec {
      * @return A BufferedImage representing the decoded RGB/RGBA image.
      * @throws IOException If an error occurs during retrieval of image info or decoding.
      */
-    public static BufferedImage decodeImage(byte[] webPData, boolean hasAlpha) throws IOException {
+    public static BufferedImage decodeImage(byte[] webPData) throws IOException {
         if (webPData == null || webPData.length == 0) {
             throw new IllegalArgumentException("The input WebP data cannot be null or empty.");
         }
@@ -107,6 +107,16 @@ public final class WebPCodec {
         int width = dimensions[0];
         int height = dimensions[1];
 
+        WebPBitstreamFeatures features = new WebPBitstreamFeatures();
+
+        int status = nativeWebP.getFeatures(webPData, webPData.length, features);
+        VP8StatusCode code = VP8StatusCode.getStatusCode(status);
+        if (code != VP8StatusCode.VP8_STATUS_OK) {
+            throw new IOException("Failed to get WebP bitstream features, error code: " + code);
+        }
+
+        boolean hasAlpha = features.hasAlpha;
+
         // Calculate the stride for RGB (3 bytes per pixel) / RGBA (4 bytes per pixel).
         int outputStride = width * (hasAlpha ? 4 : 3);
 
@@ -116,8 +126,8 @@ public final class WebPCodec {
         try {
             // Decode the WebP data into the provided RGB/RGBA buffer.
             boolean success = hasAlpha
-                    ? webP4j.decodeRGBAInto(webPData, outputBuffer, outputStride)
-                    : webP4j.decodeRGBInto(webPData, outputBuffer, outputStride);
+                    ? nativeWebP.decodeRGBAInto(webPData, outputBuffer, outputStride)
+                    : nativeWebP.decodeRGBInto(webPData, outputBuffer, outputStride);
             if (!success) {
                 throw new IOException("Failed to decode WebP data into RGB buffer.");
             }

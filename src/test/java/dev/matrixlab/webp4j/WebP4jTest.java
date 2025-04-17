@@ -99,7 +99,7 @@ public class WebP4jTest {
         assertTrue(webPData.length > 0, "WebP data should not be empty.");
 
         // Create BufferedImage from decoded RGB data
-        BufferedImage image = WebPCodec.decodeImage(webPData, false);
+        BufferedImage image = WebPCodec.decodeImage(webPData);
         assertNotNull(image, "Decoded RGB image should not be null.");
         assertTrue(image.getWidth() > 0 && image.getHeight() > 0, "Decoded RGB image dimensions must be positive.");
         // Construct the output file path for saving the decoded RGB image.
@@ -120,7 +120,7 @@ public class WebP4jTest {
         assertTrue(webPData.length > 0, "WebP data should not be empty.");
 
         // Create BufferedImage from decoded RGBA data
-        BufferedImage image = WebPCodec.decodeImage(webPData, true);
+        BufferedImage image = WebPCodec.decodeImage(webPData);
         assertNotNull(image, "Decoded RGBA image should not be null.");
         assertTrue(image.getWidth() > 0 && image.getHeight() > 0, "Decoded RGBA image dimensions must be positive.");
         // Verify that the image has an alpha channel.
