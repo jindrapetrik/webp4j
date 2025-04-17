@@ -5,10 +5,10 @@ public class NativeWebP {
     private static volatile boolean NATIVE_LIBRARY_LOADED = false;
 
     // int WebPGetInfo(const uint8_t* data, size_t data_size, int* width, int* height);
-    public native boolean getWebPInfo(byte[] data, int[] dimensions);
+    public native boolean getInfo(byte[] data, int[] dimensions);
 
     // VP8StatusCode WebPGetFeatures(const uint8_t* data, size_t data_size, WebPBitstreamFeatures* features);
-    public native int WebPGetFeatures(byte[] data, int dataSize, WebPBitstreamFeatures features);
+    public native int getFeatures(byte[] data, int dataSize, WebPBitstreamFeatures features);
 
     // size_t WebPEncodeRGB(const uint8_t* rgb, int width, int height, int stride, float quality_factor, uint8_t** output);
     public native byte[] encodeRGB(byte[] image, int width, int height, int stride, float quality);

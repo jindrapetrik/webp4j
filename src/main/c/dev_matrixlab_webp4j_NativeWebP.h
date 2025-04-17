@@ -9,18 +9,18 @@ extern "C" {
 #endif
 /*
  * Class:     dev_matrixlab_webp4j_NativeWebP
- * Method:    getWebPInfo
+ * Method:    getInfo
  * Signature: ([B[I)Z
  */
-JNIEXPORT jboolean JNICALL Java_dev_matrixlab_webp4j_NativeWebP_getWebPInfo
+JNIEXPORT jboolean JNICALL Java_dev_matrixlab_webp4j_NativeWebP_getInfo
   (JNIEnv *, jobject, jbyteArray, jintArray);
 
 /*
  * Class:     dev_matrixlab_webp4j_NativeWebP
- * Method:    WebPGetFeatures
+ * Method:    getFeatures
  * Signature: ([BILdev/matrixlab/webp4j/WebPBitstreamFeatures;)I
  */
-JNIEXPORT jint JNICALL Java_dev_matrixlab_webp4j_NativeWebP_WebPGetFeatures
+JNIEXPORT jint JNICALL Java_dev_matrixlab_webp4j_NativeWebP_getFeatures
   (JNIEnv *, jobject, jbyteArray, jint, jobject);
 
 /*

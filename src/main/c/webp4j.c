@@ -39,7 +39,7 @@ void freeUint8(uint8_t* ptr) {
 
 /*
  * Class:     NativeWebP
- * Method:    getWebPInfo
+ * Method:    getInfo
  * Signature: ([B[I)Z
  *
  * This JNI function retrieves the width and height of a WebP image.
@@ -60,7 +60,7 @@ void freeUint8(uint8_t* ptr) {
  * - true (JNI_TRUE) if the operation is successful.
  * - false (JNI_FALSE) if the operation fails.
  */
-JNIEXPORT jboolean JNICALL Java_dev_matrixlab_webp4j_NativeWebP_getWebPInfo
+JNIEXPORT jboolean JNICALL Java_dev_matrixlab_webp4j_NativeWebP_getInfo
   (JNIEnv *env, jobject obj, jbyteArray data, jintArray dimensions) {
 
     // Convert Java byte array to native uint8_t array
@@ -111,7 +111,7 @@ JNIEXPORT jboolean JNICALL Java_dev_matrixlab_webp4j_NativeWebP_getWebPInfo
 
 /*
  * Class:     NativeWebP
- * Method:    WebPGetFeatures
+ * Method:    getFeatures
  * Signature: ([BI LWebPBitstreamFeatures;)I
  *
  * This JNI function wraps the libwebp function WebPGetFeatures.
@@ -133,7 +133,7 @@ JNIEXPORT jboolean JNICALL Java_dev_matrixlab_webp4j_NativeWebP_getWebPInfo
  * - VP8_STATUS_OK (0) if the operation is successful.
  * - A non-zero error code if the operation fails.
  */
-JNIEXPORT jint JNICALL Java_dev_matrixlab_webp4j_NativeWebP_WebPGetFeatures
+JNIEXPORT jint JNICALL Java_dev_matrixlab_webp4j_NativeWebP_getFeatures
   (JNIEnv *env, jobject obj, jbyteArray data, jint dataSize, jobject featuresObj) {
 
     // Retrieve the pointer to the input byte array.
