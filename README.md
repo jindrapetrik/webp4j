@@ -44,33 +44,68 @@ To use WebP4j in your project, add the following dependency to your `pom.xml` fi
 <dependency>
     <groupId>dev.matrixlab</groupId>
     <artifactId>webp4j</artifactId>
-    <version>1.0.0-beta</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
-### Loading the Native Library
-
-First, ensure the native library is loaded before calling any other methods:
+### Native methods
 
 ```java
-WebP4j.ensureNativeLibraryLoaded();
-```
-
-### Encoding and Decoding
-
-```java
-public native boolean getWebPInfo(byte[] data, int[] dimensions);
+public native boolean getInfo(byte[] data, int[] dimensions);
+public native int getFeatures(byte[] data, int dataSize, WebPBitstreamFeatures features);
 public native byte[] encodeRGB(byte[] image, int width, int height, int stride, float quality);
 public native byte[] encodeRGBA(byte[] image, int width, int height, int stride, float quality);
-public native boolean decodeRGBAInto(byte[] data, byte[] outputBuffer, int outputStride);
 public native boolean decodeRGBInto(byte[] data, byte[] outputBuffer, int outputStride);
+public native boolean decodeRGBAInto(byte[] data, byte[] outputBuffer, int outputStride);
+```
+
+### Encoding and Decoding methods
+
+```java
+public static byte[] encodeImage(BufferedImage bufferedImage, float quality) throws IOException;
+public static BufferedImage decodeImage(byte[] webPData) throws IOException;
+```
+
+You can use the `encodeImage()` and `decodeImage()` methods of the `WebPCodec` class to convert image formats such as JPG/PNG to WEBP format.
+
+### Example
+
+```java
+public void encodeToWebP() throws IOException {
+    // Read the source image from disk
+    BufferedImage bufferedImage = ImageIO.read(new File(IMAGE_FILE));
+
+    // Set the compression quality (0.0f = worst, 100.0f = best)
+    float quality = 75.0f;
+
+    // Encode the BufferedImage into WebP byte array
+    byte[] encodedWebP = WebPCodec.encodeImage(bufferedImage, quality);
+
+    // Open an output stream to write the WebP data
+    FileOutputStream fos = new FileOutputStream(WEBP_FILE);
+
+    // Write the encoded bytes to the output file
+    fos.write(encodedWebP);
+
+    // Close the stream to release system resources
+    fos.close();
+}
+
+public void decodeFromWebP() throws IOException {
+    // Read all bytes from the WebP file into memory
+    byte[] webPData = Files.readAllBytes(Paths.get(WEBP_FILE));
+
+    // Decode the WebP byte array into a BufferedImage
+    BufferedImage image = WebPCodec.decodeImage(webPData);
+
+    // Write the decoded image as a JPEG file
+    ImageIO.write(image, "jpg", new File(IMAGE_FILE));
+}
 ```
 
 ## Future Work
 
-- At present, WebP4j has been developed with native methods for JNI calls, supporting encoding and decoding of RGB and RGBA images. In the future, we plan to further encapsulate and extend the functionality, aiming to provide a **high-level API** that is easy to use and ready out-of-the-box. The goal is to make the library even more user-friendly by abstracting low-level operations, allowing developers to focus on integration without needing to manage native resources directly.
-
-Stay tuned for upcoming updates!
+Currently, WebP4j has encapsulated native methods. We will continue to update, develop more efficient APIs, and continuously improve documentation.
 
 ## License
 
