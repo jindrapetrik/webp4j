@@ -316,6 +316,132 @@ JNIEXPORT jbyteArray JNICALL Java_dev_matrixlab_webp4j_NativeWebP_encodeRGBA
 
 /*
  * Class:     NativeWebP
+ * Method:    encodeLosslessRGB
+ * Signature: ([BIII)[B
+ *
+ * This JNI function wraps the libwebp function WebPEncodeLosslessRGB.
+ * It encodes an RGB image provided as a byte array into the lossless WebP format.
+ *
+ * Parameters:
+ * - image: A Java byte array containing the RGB image data.
+ * - width: The width of the image in pixels.
+ * - height: The height of the image in pixels.
+ * - stride: The number of bytes per row in the image.
+ *
+ * The function performs the following steps:
+ * 1. Converts the Java byte array to a native uint8_t array.
+ * 2. Calls the WebPEncodeLosslessRGB function to encode the image into lossless WebP format.
+ * 3. Creates a new Java byte array to store the encoded WebP data.
+ * 4. Copies the encoded data into the Java byte array and returns it.
+ *
+ * Returns:
+ * - A Java byte array containing the encoded lossless WebP image, or NULL if encoding fails.
+ */
+JNIEXPORT jbyteArray JNICALL Java_dev_matrixlab_webp4j_NativeWebP_encodeLosslessRGB
+  (JNIEnv *env, jobject obj, jbyteArray image, jint width, jint height, jint stride) {
+
+    // Convert Java byte array to native uint8_t array
+    uint8_t* rgb = jByteArrayToUint8(env, image);
+    if (rgb == NULL) {
+        return NULL;  // Failed to convert byte array
+    }
+
+    // Output buffer
+    uint8_t* output = NULL;
+
+    // Call WebPEncodeLosslessRGB function
+    size_t output_size = WebPEncodeLosslessRGB(rgb, width, height, stride, &output);
+
+    // Free the input RGB array
+    freeUint8(rgb);
+
+    // Check if encoding was successful
+    if (output_size == 0 || output == NULL) {
+        return NULL;  // Encoding failed
+    }
+
+    // Create a new Java byte array for the output
+    jbyteArray result = (*env)->NewByteArray(env, output_size);
+    if (result == NULL) {
+        WebPFree(output);  // Ensure the output buffer is freed
+        return NULL;  // Memory allocation failed
+    }
+
+    // Copy the encoded output to the Java byte array
+    (*env)->SetByteArrayRegion(env, result, 0, output_size, (jbyte*) output);
+
+    // Free the WebP output
+    WebPFree(output);
+
+    // Return the result
+    return result;
+}
+
+/*
+ * Class:     NativeWebP
+ * Method:    encodeLosslessRGBA
+ * Signature: ([BIII)[B
+ *
+ * This JNI function wraps the libwebp function WebPEncodeLosslessRGBA.
+ * It encodes an RGBA image provided as a byte array into the lossless WebP format.
+ *
+ * Parameters:
+ * - image: A Java byte array containing the RGBA image data.
+ * - width: The width of the image in pixels.
+ * - height: The height of the image in pixels.
+ * - stride: The number of bytes per row in the image.
+ *
+ * The function performs the following steps:
+ * 1. Converts the Java byte array to a native uint8_t array.
+ * 2. Calls the WebPEncodeLosslessRGBA function to encode the image into lossless WebP format.
+ * 3. Creates a new Java byte array to store the encoded WebP data.
+ * 4. Copies the encoded data into the Java byte array and returns it.
+ *
+ * Returns:
+ * - A Java byte array containing the encoded lossless WebP image, or NULL if encoding fails.
+ */
+JNIEXPORT jbyteArray JNICALL Java_dev_matrixlab_webp4j_NativeWebP_encodeLosslessRGBA
+  (JNIEnv *env, jobject obj, jbyteArray image, jint width, jint height, jint stride) {
+
+    // Convert Java byte array to native uint8_t array
+    uint8_t* rgba = jByteArrayToUint8(env, image);
+    if (rgba == NULL) {
+        return NULL;  // Failed to convert byte array
+    }
+
+    // Output buffer
+    uint8_t* output = NULL;
+
+    // Call WebPEncodeLosslessRGBA function
+    size_t output_size = WebPEncodeLosslessRGBA(rgba, width, height, stride, &output);
+
+    // Free the input RGBA array
+    freeUint8(rgba);
+
+    // Check if encoding was successful
+    if (output_size == 0 || output == NULL) {
+        return NULL;  // Encoding failed
+    }
+
+    // Create a new Java byte array for the output
+    jbyteArray result = (*env)->NewByteArray(env, output_size);
+    if (result == NULL) {
+        WebPFree(output);  // Ensure the output buffer is freed
+        return NULL;  // Memory allocation failed
+    }
+
+    // Copy the encoded output to the Java byte array
+    (*env)->SetByteArrayRegion(env, result, 0, output_size, (jbyte*) output);
+
+    // Free the WebP output
+    WebPFree(output);
+
+    // Return the result
+    return result;
+}
+
+/*
+ * Class:     NativeWebP
  * Method:    decodeRGBInto
  * Signature: ([B[BI)Z
  *

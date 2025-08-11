@@ -16,6 +16,12 @@ public class NativeWebP {
     // size_t WebPEncodeRGBA(const uint8_t* rgba, int width, int height, int stride, float quality_factor, uint8_t** output);
     public native byte[] encodeRGBA(byte[] image, int width, int height, int stride, float quality);
 
+    // size_t WebPEncodeLosslessRGB(const uint8_t* rgb, int width, int height, int stride, uint8_t** output);
+    public native byte[] encodeLosslessRGB(byte[] image, int width, int height, int stride);
+
+    // size_t WebPEncodeLosslessRGBA(const uint8_t* rgba, int width, int height, int stride, uint8_t** output);
+    public native byte[] encodeLosslessRGBA(byte[] image, int width, int height, int stride);
+
     // uint8_t* WebPDecodeRGBInto(const uint8_t* data, size_t data_size, uint8_t* output_buffer, int output_buffer_size, int output_stride);
     public native boolean decodeRGBInto(byte[] data, byte[] outputBuffer, int outputStride);
 

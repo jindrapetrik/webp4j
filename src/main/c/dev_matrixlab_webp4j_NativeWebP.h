@@ -41,6 +41,22 @@ JNIEXPORT jbyteArray JNICALL Java_dev_matrixlab_webp4j_NativeWebP_encodeRGBA
 
 /*
  * Class:     dev_matrixlab_webp4j_NativeWebP
+ * Method:    encodeLosslessRGB
+ * Signature: ([BIII)[B
+ */
+JNIEXPORT jbyteArray JNICALL Java_dev_matrixlab_webp4j_NativeWebP_encodeLosslessRGB
+  (JNIEnv *, jobject, jbyteArray, jint, jint, jint);
+
+/*
+ * Class:     dev_matrixlab_webp4j_NativeWebP
+ * Method:    encodeLosslessRGBA
+ * Signature: ([BIII)[B
+ */
+JNIEXPORT jbyteArray JNICALL Java_dev_matrixlab_webp4j_NativeWebP_encodeLosslessRGBA
+  (JNIEnv *, jobject, jbyteArray, jint, jint, jint);
+
+/*
+ * Class:     dev_matrixlab_webp4j_NativeWebP
  * Method:    decodeRGBInto
  * Signature: ([B[BI)Z
  */

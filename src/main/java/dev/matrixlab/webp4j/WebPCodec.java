@@ -43,12 +43,13 @@ public final class WebPCodec {
     /**
      * Encodes an RGB/RGBA BufferedImage to a WebP encoded byte array.
      *
-     * @param bufferedImage The input BufferedImage in RGB/RGBA(must have an alpha channel) format.
-     * @param quality       The WebP quality parameter (e.g., 75.0f).
+     * @param bufferedImage The input BufferedImage in RGB/RGBA format.
+     * @param quality       The WebP quality parameter (0-100). Ignored when lossless is true.
+     * @param lossless      True for lossless encoding, false for lossy encoding.
      * @return A byte array containing the WebP encoded data.
      * @throws IOException If an error occurs during image conversion or encoding.
      */
-    public static byte[] encodeImage(BufferedImage bufferedImage, float quality) throws IOException {
+    public static byte[] encodeImage(BufferedImage bufferedImage, float quality, boolean lossless) throws IOException {
         if (bufferedImage == null) {
             throw new IllegalArgumentException("The input BufferedImage cannot be null.");
         }
@@ -72,21 +73,44 @@ public final class WebPCodec {
         int stride = width * (hasAlpha ? 4 : 3);
 
         // Encode the RGB/RGBA data to WebP format using nativeWebP.
-        byte[] encodedWebP = null;
         try {
-            encodedWebP = hasAlpha
-                    ? nativeWebP.encodeRGBA(imageBytes, width, height, stride, quality)
-                    : nativeWebP.encodeRGB(imageBytes, width, height, stride, quality);
+            byte[] encodedWebP = encodeWithNativeLibrary(imageBytes, width, height, stride, quality, lossless, hasAlpha);
+            
             if (encodedWebP == null || encodedWebP.length == 0) {
-                throw new IOException("WebP encoding failed.");
+                String encodingType = lossless ? "Lossless" : "Lossy";
+                throw new IOException(encodingType + " WebP encoding failed.");
             }
+            
             return encodedWebP;
         } finally {
-            // Clear the contents of the outputBuffer and remove its reference to allow garbage collection.
+            // Clear the contents of the imageBytes and remove its reference to allow garbage collection.
             Arrays.fill(imageBytes, (byte) 0);
-            imageBytes = null;
         }
+    }
 
+    /**
+     * Encodes an RGB/RGBA BufferedImage to a lossy WebP encoded byte array.
+     * This is a convenience method that calls encodeImage(bufferedImage, quality, false).
+     *
+     * @param bufferedImage The input BufferedImage in RGB/RGBA format.
+     * @param quality       The WebP quality parameter (0-100).
+     * @return A byte array containing the lossy WebP encoded data.
+     * @throws IOException If an error occurs during image conversion or encoding.
+     */
+    public static byte[] encodeImage(BufferedImage bufferedImage, float quality) throws IOException {
+        return encodeImage(bufferedImage, quality, false);
+    }
+
+    /**
+     * Encodes an RGB/RGBA BufferedImage to a lossless WebP encoded byte array.
+     * This is a convenience method that calls encodeImage(bufferedImage, 0, true).
+     *
+     * @param bufferedImage The input BufferedImage in RGB/RGBA format.
+     * @return A byte array containing the lossless WebP encoded data.
+     * @throws IOException If an error occurs during image conversion or encoding.
+     */
+    public static byte[] encodeLosslessImage(BufferedImage bufferedImage) throws IOException {
+        return encodeImage(bufferedImage, 0, true);
     }
 
     /**
@@ -138,6 +162,31 @@ public final class WebPCodec {
             // Clear the contents of the outputBuffer and remove its reference to allow garbage collection.
             Arrays.fill(outputBuffer, (byte) 0);
             outputBuffer = null;
+        }
+    }
+
+    /**
+     * Handles the native library encoding calls based on encoding type and alpha channel.
+     *
+     * @param imageBytes The image byte data
+     * @param width      Image width
+     * @param height     Image height
+     * @param stride     Bytes per row
+     * @param quality    Quality parameter (ignored for lossless)
+     * @param lossless   True for lossless, false for lossy
+     * @param hasAlpha   True if image has alpha channel
+     * @return Encoded WebP byte array
+     */
+    private static byte[] encodeWithNativeLibrary(byte[] imageBytes, int width, int height, int stride,
+                                                  float quality, boolean lossless, boolean hasAlpha) {
+        if (lossless) {
+            return hasAlpha
+                    ? nativeWebP.encodeLosslessRGBA(imageBytes, width, height, stride)
+                    : nativeWebP.encodeLosslessRGB(imageBytes, width, height, stride);
+        } else {
+            return hasAlpha
+                    ? nativeWebP.encodeRGBA(imageBytes, width, height, stride, quality)
+                    : nativeWebP.encodeRGB(imageBytes, width, height, stride, quality);
         }
     }
 
