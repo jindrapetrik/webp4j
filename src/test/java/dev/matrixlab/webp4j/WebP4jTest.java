@@ -14,24 +14,39 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class WebP4jTest {
 
-    public static final String IMAGE_RGB_FILE = Paths.get(System.getProperty("user.dir"), "/src/test/resources", "test_rgb.jpg").toString();
+    private static final String TEST_RESOURCES_DIR = "src/test/resources/";
 
-    public static final String IMAGE_RGB_WEBP_FILE = Paths.get(System.getProperty("user.dir"), "/src/test/resources", "test_rgb.webp").toString();
-
-    public static final String IMAGE_RGBA_FILE = Paths.get(System.getProperty("user.dir"), "/src/test/resources", "test_rgba.png").toString();
+    private static final String FORMAT_PNG = "png";
+    
+    // Source images for testing
+    private static final String SOURCE_RGB_PNG = TEST_RESOURCES_DIR + "test_rgb.png";
+    private static final String SOURCE_RGBA_PNG = TEST_RESOURCES_DIR + "test_rgba.png";
+    private static final String SOURCE_RGB_WEBP = TEST_RESOURCES_DIR + "test_rgb.webp";
+    
+    // Generated output files
+    private static final String OUTPUT_RGB_WEBP = TEST_RESOURCES_DIR + "encode_rgb.webp";
+    private static final String OUTPUT_RGBA_WEBP = TEST_RESOURCES_DIR + "encode_rgba.webp";
+    private static final String OUTPUT_LOSSLESS_RGB_WEBP = TEST_RESOURCES_DIR + "encode_lossless_rgb.webp";
+    private static final String OUTPUT_LOSSLESS_RGBA_WEBP = TEST_RESOURCES_DIR + "encode_lossless_rgba.webp";
+    
+    // Decoded output files
+    private static final String OUTPUT_DECODED_RGB_PNG = TEST_RESOURCES_DIR + "decode_rgb.png";
+    private static final String OUTPUT_DECODED_RGBA_PNG = TEST_RESOURCES_DIR + "decoded_rgba.png";
+    private static final String OUTPUT_DECODED_LOSSLESS_RGB_JPG = TEST_RESOURCES_DIR + "decode_lossless_rgb.jpg";
+    private static final String OUTPUT_DECODED_LOSSLESS_RGBA_PNG = TEST_RESOURCES_DIR + "decode_lossless_rgba.png";
 
     @Test
     public void testGetWebPInfo() {
         try {
             // Load WebP image file
-            byte[] webPData = Files.readAllBytes(Paths.get(IMAGE_RGB_WEBP_FILE));
+            byte[] webPData = Files.readAllBytes(Paths.get(SOURCE_RGB_WEBP));
 
             // Retrieve WebP image information
             int[] dimensions = WebPCodec.getWebPInfo(webPData);
 
             // Validate the retrieved image dimensions
-            assertEquals(5152, dimensions[0], "Width does not match expected value.");
-            assertEquals(6440, dimensions[1], "Height does not match expected value.");
+            assertEquals(2248, dimensions[0], "Width does not match expected value.");
+            assertEquals(1442, dimensions[1], "Height does not match expected value.");
 
         } catch (IOException e) {
             fail("Exception thrown during WebP info retrieval: " + e.getMessage());
@@ -42,7 +57,7 @@ public class WebP4jTest {
     public void testEncodeRGB() {
         try {
             // Load RGB image file
-            BufferedImage bufferedImage = ImageIO.read(new File(IMAGE_RGB_FILE));
+            BufferedImage bufferedImage = ImageIO.read(new File(SOURCE_RGB_PNG));
             assertNotNull(bufferedImage, "Failed to load test image.");
 
             // Encode image to WebP
@@ -54,7 +69,7 @@ public class WebP4jTest {
             assertTrue(encodedWebP.length > 0, "Encoded WebP file is empty.");
 
             // Save the encoded file for manual inspection
-            try (FileOutputStream fos = new FileOutputStream(IMAGE_RGB_FILE.replace("test_rgb.jpg", "encode_rgb.webp"))) {
+            try (FileOutputStream fos = new FileOutputStream(OUTPUT_RGB_WEBP)) {
                 fos.write(encodedWebP);
             }
 
@@ -67,7 +82,7 @@ public class WebP4jTest {
     public void testEncodeRGBA() {
         try {
             // Load RGBA image file
-            BufferedImage bufferedImage = ImageIO.read(new File(IMAGE_RGBA_FILE));
+            BufferedImage bufferedImage = ImageIO.read(new File(SOURCE_RGBA_PNG));
             assertNotNull(bufferedImage, "Failed to load test image.");
 
             // Encode image to WebP
@@ -79,7 +94,7 @@ public class WebP4jTest {
             assertTrue(encodedWebP.length > 0, "Encoded WebP file is empty.");
 
             // Save the encoded file for manual inspection
-            try (FileOutputStream fos = new FileOutputStream(IMAGE_RGBA_FILE.replace("test_rgba.png", "encode_rgba.webp"))) {
+            try (FileOutputStream fos = new FileOutputStream(OUTPUT_RGBA_WEBP)) {
                 fos.write(encodedWebP);
             }
 
@@ -94,7 +109,7 @@ public class WebP4jTest {
     @Test
     public void testDecodeRGBInto() throws IOException {
         // Load WebP image file to decode
-        byte[] webPData = Files.readAllBytes(Paths.get(IMAGE_RGB_FILE.replace("test_rgb.jpg", "encode_rgb.webp")));
+        byte[] webPData = Files.readAllBytes(Paths.get(OUTPUT_RGB_WEBP));
         assertNotNull(webPData, "WebP data should not be null.");
         assertTrue(webPData.length > 0, "WebP data should not be empty.");
 
@@ -102,11 +117,10 @@ public class WebP4jTest {
         BufferedImage image = WebPCodec.decodeImage(webPData);
         assertNotNull(image, "Decoded RGB image should not be null.");
         assertTrue(image.getWidth() > 0 && image.getHeight() > 0, "Decoded RGB image dimensions must be positive.");
-        // Construct the output file path for saving the decoded RGB image.
         assertFalse(image.getColorModel().hasAlpha(), "Decoded RGB image should not have alpha.");
 
         // Save decoded image to a file
-        ImageIO.write(image, "jpg", new File(IMAGE_RGB_FILE.replace("test_rgb.jpg", "decode_rgb.jpg")));
+        ImageIO.write(image, FORMAT_PNG, new File(OUTPUT_DECODED_RGB_PNG));
     }
 
     /**
@@ -115,7 +129,7 @@ public class WebP4jTest {
     @Test
     public void testDecodeRGBAInto() throws IOException {
         // Load WebP image file to decode
-        byte[] webPData = Files.readAllBytes(Paths.get(IMAGE_RGBA_FILE.replace("test_rgba.png", "encode_rgba.webp")));
+        byte[] webPData = Files.readAllBytes(Paths.get(OUTPUT_RGBA_WEBP));
         assertNotNull(webPData, "WebP data should not be null.");
         assertTrue(webPData.length > 0, "WebP data should not be empty.");
 
@@ -123,11 +137,124 @@ public class WebP4jTest {
         BufferedImage image = WebPCodec.decodeImage(webPData);
         assertNotNull(image, "Decoded RGBA image should not be null.");
         assertTrue(image.getWidth() > 0 && image.getHeight() > 0, "Decoded RGBA image dimensions must be positive.");
-        // Verify that the image has an alpha channel.
         assertTrue(image.getColorModel().hasAlpha(), "Decoded RGBA image should have alpha.");
 
         // Save decoded image to a file
-        ImageIO.write(image, "png", new File(IMAGE_RGBA_FILE.replace("test_rgba.png", "decoded_rgba.png")));
+        ImageIO.write(image, FORMAT_PNG, new File(OUTPUT_DECODED_RGBA_PNG));
     }
 
+    @Test
+    public void testEncodeLosslessRGB() {
+        try {
+            // Load RGB image file
+            BufferedImage bufferedImage = ImageIO.read(new File(SOURCE_RGB_PNG));
+            assertNotNull(bufferedImage, "Failed to load test image.");
+
+            // Encode image to lossless WebP
+            byte[] encodedWebP = WebPCodec.encodeLosslessImage(bufferedImage);
+
+            // Validate the encoded result
+            assertNotNull(encodedWebP, "Lossless WebP encoding failed for RGB.");
+            assertTrue(encodedWebP.length > 0, "Encoded lossless WebP file is empty.");
+
+            // Save the encoded file for manual inspection
+            try (FileOutputStream fos = new FileOutputStream(OUTPUT_LOSSLESS_RGB_WEBP)) {
+                fos.write(encodedWebP);
+            }
+
+        } catch (IOException e) {
+            fail("Exception thrown during lossless WebP encoding: " + e.getMessage());
+        }
+    }
+
+    @Test
+    public void testEncodeLosslessRGBA() {
+        try {
+            // Load RGBA image file
+            BufferedImage bufferedImage = ImageIO.read(new File(SOURCE_RGBA_PNG));
+            assertNotNull(bufferedImage, "Failed to load test image.");
+
+            // Encode image to lossless WebP
+            byte[] encodedWebP = WebPCodec.encodeLosslessImage(bufferedImage);
+
+            // Validate the encoded result
+            assertNotNull(encodedWebP, "Lossless WebP encoding failed for RGBA.");
+            assertTrue(encodedWebP.length > 0, "Encoded lossless WebP file is empty.");
+
+            // Save the encoded file for manual inspection
+            try (FileOutputStream fos = new FileOutputStream(OUTPUT_LOSSLESS_RGBA_WEBP)) {
+                fos.write(encodedWebP);
+            }
+
+        } catch (IOException e) {
+            fail("Exception thrown during lossless WebP encoding: " + e.getMessage());
+        }
+    }
+
+    @Test
+    public void testDecodeLosslessRGB() throws IOException {
+        // Load lossless WebP image file to decode
+        byte[] webPData = Files.readAllBytes(Paths.get(OUTPUT_LOSSLESS_RGB_WEBP));
+        assertNotNull(webPData, "Lossless WebP data should not be null.");
+        assertTrue(webPData.length > 0, "Lossless WebP data should not be empty.");
+
+        // Create BufferedImage from decoded RGB data
+        BufferedImage image = WebPCodec.decodeImage(webPData);
+        assertNotNull(image, "Decoded lossless RGB image should not be null.");
+        assertTrue(image.getWidth() > 0 && image.getHeight() > 0, "Decoded lossless RGB image dimensions must be positive.");
+        assertFalse(image.getColorModel().hasAlpha(), "Decoded lossless RGB image should not have alpha.");
+
+        // Save decoded image to a file
+        ImageIO.write(image, FORMAT_PNG, new File(OUTPUT_DECODED_LOSSLESS_RGB_JPG));
+    }
+
+    @Test
+    public void testDecodeLosslessRGBA() throws IOException {
+        // Load lossless WebP image file to decode
+        byte[] webPData = Files.readAllBytes(Paths.get(OUTPUT_LOSSLESS_RGBA_WEBP));
+        assertNotNull(webPData, "Lossless WebP data should not be null.");
+        assertTrue(webPData.length > 0, "Lossless WebP data should not be empty.");
+
+        // Create BufferedImage from decoded RGBA data
+        BufferedImage image = WebPCodec.decodeImage(webPData);
+        assertNotNull(image, "Decoded lossless RGBA image should not be null.");
+        assertTrue(image.getWidth() > 0 && image.getHeight() > 0, "Decoded lossless RGBA image dimensions must be positive.");
+        assertTrue(image.getColorModel().hasAlpha(), "Decoded lossless RGBA image should have alpha.");
+
+        // Save decoded image to a file
+        ImageIO.write(image, FORMAT_PNG, new File(OUTPUT_DECODED_LOSSLESS_RGBA_PNG));
+    }
+
+    @Test
+    public void testWebPBitstreamFeatures() throws IOException {
+        // Load WebP file for feature analysis
+        byte[] webPData = Files.readAllBytes(Paths.get(OUTPUT_LOSSLESS_RGB_WEBP));
+        assertNotNull(webPData, "WebP data should not be null");
+        assertTrue(webPData.length > 0, "WebP data should not be empty");
+
+        // Create NativeWebP instance and features container
+        NativeWebP nativeWebP = new NativeWebP();
+        WebPBitstreamFeatures features = new WebPBitstreamFeatures();
+        
+        // Extract bitstream features
+        int status = nativeWebP.getFeatures(webPData, webPData.length, features);
+        VP8StatusCode statusCode = VP8StatusCode.getStatusCode(status);
+        
+        // Validate feature extraction succeeded
+        assertEquals(VP8StatusCode.VP8_STATUS_OK, statusCode, "Failed to get WebP bitstream features");
+        
+        // Validate image dimensions
+        assertTrue(features.width > 0, "Image width should be positive, actual: " + features.width);
+        assertTrue(features.height > 0, "Image height should be positive, actual: " + features.height);
+        
+        // Validate compression format
+        assertTrue(features.format >= 0 && features.format <= 2, 
+                  "Format should be 0 (undefined/mixed), 1 (lossy), or 2 (lossless), actual: " + features.format);
+        
+        // Validate specific properties for lossless RGB image
+        // Format should be 0 (undefined/mixed), 1 (lossy), or 2 (lossless)
+        assertEquals(2, features.format, "Expected lossless compression format");
+        assertFalse(features.hasAlpha, "RGB image should not have alpha channel");
+        assertFalse(features.hasAnimation, "Static image should not have animation");
+    }
 }
