@@ -8,7 +8,7 @@ import java.nio.file.Files;
 
 public class NativeLibraryLoaderUtils {
 
-    private static final String LIBWEBP_VERSION = "1.4.0";
+    private static final String LIBWEBP_VERSION = "1.6.0";
 
     public static void loadLibrary() {
         String os = System.getProperty("os.name").toLowerCase();
