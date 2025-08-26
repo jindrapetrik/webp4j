@@ -13,9 +13,7 @@
 
 ## Prerequisites
 
-Before using WebP4j, ensure you have the following requirements in place:
-
-- Java Development Kit (JDK) 17 or higher
+This library is developed and tested with Java 17+. While Java 8 should be supported, it has not been thoroughly tested. For best compatibility, we recommend using Java 17 or later.
 
 ### Important Note:
 
@@ -32,7 +30,7 @@ WebP4j currently supports the following platforms:
 
 ### macOS (x86-64) Support:
 
-Unfortunately, I do not have access to a macOS (x86-64) device, so I am unable to compile the native library for this platform. If you have access to a macOS (x86-64) device, I would greatly appreciate it if you could compile the native library for me and share it with the project. Thank you in advance for your contribution!
+> Unfortunately, I do not have access to a macOS (x86-64) device, so I am unable to compile the native library for this platform. If you have access to a macOS (x86-64) device, I would greatly appreciate it if you could compile the native library for me and share it with the project. Thank you in advance for your contribution!
 
 ## API
 
